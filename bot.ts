@@ -139,9 +139,11 @@ const commands = [imagineCommand, switchModelCommand]
 await Promise.all(
     commands.map((command) => {
         bot.helpers.createGuildApplicationCommand(command, Secret.GUILD_ID)
+        // bot.helpers.createGlobalApplicationCommand(command)
     })
 )
 await bot.helpers.upsertGuildApplicationCommands(Secret.GUILD_ID, commands)
+// await bot.helpers.upsertGlobalApplicationCommands(commands)
 
 bot.events.interactionCreate = async (b, interaction) => {
     switch (interaction.data?.name) {
