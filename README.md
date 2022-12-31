@@ -13,9 +13,42 @@ Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.c
 - `--api` **必須**。API機能を有効にします
 - `--listen` 欲しい場合のみ。`0.0.0.0` でホストされるので、ドメインと紐づけている人とかはこれが必要。ただし、これを有効にすると拡張機能を入れることが出来ないので、頻繁に拡張機能を弄る人は非推奨。
 - `--nowebui` 推奨。Gradio の Web UI 機能を無効にします。Bot から生成するだけなら Web UI は不要なので、これを有効にすると起動が早くなったりする気がします。多分。
-- `--share` 欲しい場合のみ。ただし `--nowebui` とは共存できません。Gradio を外部に公開できるようになるので、Bot をローカル以外で動かすことができるようになります。
+- `--share` Botを自分のPC以外で動かしたいときには必須。ただし `--nowebui` とは共存できません。
+- `--ngrok` Gradio の share を利用しないときの選択肢。詳しい使い方知らないのでわからない。
 
 また、起動時に出る `Running on local URL:  http://0.0.0.0:7860` や `Uvicorn running on http://0.0.0.0:7861` はちゃんと見ておきましょう。特にポート番号。基本的に `localhost:7860` ですが、 `--nowebui` の場合は `7861` になります。
+
+## `./webui-user.bat` の設定例
+
+### ローカルで軽く動かすとき
+
+```bat
+@echo off
+
+set PYTHON=
+set GIT=
+set VENV_DIR=
+set COMMANDLINE_ARGS=--xformers --api --nowebui
+set ATTN_PRECISION=fp16
+
+call webui.bat
+```
+
+`--xformers` などはお好みで
+
+### 外部に公開するとき
+
+```bat
+@echo off
+
+set PYTHON=
+set GIT=
+set VENV_DIR=
+set COMMANDLINE_ARGS=--xformers --api --share
+set ATTN_PRECISION=fp16
+
+call webui.bat
+```
 
 ## 環境変数
 
@@ -24,7 +57,7 @@ Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.c
 ```
 DISCORD_TOKEN=hoge
 GUILD_ID=1234
-AUTO1111_HOST=http://localhost:7860 #WebUIのアドレス
+AUTO1111_HOST=http://localhost:7860 #WebUIのアドレス。外部公開の場合は https://hogehoge.gradio.app みたいな感じ。最後の / はつけない
 ```
 
 `GUILD_ID` は、BOTを使うサーバーのIDを入れます。これは、スラッシュコマンドの反映が速いため、自分のサーバーだけを対象にしていますが、グローバルで使いたい場合は別途でコードの編集が必要です(現状)。
