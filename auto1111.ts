@@ -74,6 +74,22 @@ export class AUTO1111 {
         return data
     }
 
+    refreshCheckpoints = async () => {
+        const url = new URL("/sdapi/v1/refresh-checkpoints", this.host)
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        const _data = await res.text()
+        if (res.status === 200) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     imagine = async ({
         prompt,
         negativePrompt,
