@@ -1,7 +1,7 @@
 {
     "tasks": {
         "test": "deno test -A",
-        "dev": "deno run -A --watch bot.ts",
-        "start": "deno run -A bot.ts"
+        "dev": "deno run -A --watch main.ts",
+        "start": "deno run -A main.ts"
     }
 }

@@ -1,0 +1,12 @@
+# Discord
+DISCORD_TOKEN: hogehoge
+GUILD_ID: 1234567890
+
+# BOT privilege
+allows:
+  - switch
+  - refresh
+  - imagine
+
+# AUTOMATIC 1111's Web UI
+host: http://localhost:7860
