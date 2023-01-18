@@ -2,9 +2,11 @@
 
 Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
-# Usage
 
-めんどいので日本語で書きます。
+![image](https://user-images.githubusercontent.com/60182057/213064092-6a1e057c-3cfd-48f6-8c59-9c14359b00b2.png)
+
+
+# 使い方
 
 ## Web UIの準備
 
@@ -34,7 +36,7 @@ set ATTN_PRECISION=fp16
 call webui.bat
 ```
 
-`--xformers` などはお好みで
+`--xformers` などはお好みで指定してください。
 
 ### 外部に公開するとき
 
@@ -50,56 +52,38 @@ set ATTN_PRECISION=fp16
 call webui.bat
 ```
 
-## 環境変数
+## BOT の設定
 
-`.env` を作成し、 `.env.example` に従って必要なトークンなどを入れます
+`config.example.yaml` をコピー&リネームして `config.yaml` を作成します。
 
-```
-DISCORD_TOKEN=hoge
-GUILD_ID=1234
-AUTO1111_HOST=http://localhost:7860 #WebUIのアドレス。外部公開の場合は https://hogehoge.gradio.app みたいな感じ。最後の / はつけない
-```
+例に従って必要な項目を入力します。
 
-`GUILD_ID` は、BOTを使うサーバーのIDを入れます。これは、スラッシュコマンドの反映が速いため、自分のサーバーだけを対象にしていますが、グローバルで使いたい場合は別途でコードの編集が必要です(現状)。
+```yaml
+# Discord
+DISCORD_TOKEN: hogehoge
+GUILD_ID: 1234567890
 
-`bot.ts` の
+# BOT
+globalCommands: false
+allows:
+  - switch
+  - refresh
+  - imagine
 
-```ts
-await Promise.all(
-    commands.map((command) => {
-        bot.helpers.createGuildApplicationCommand(command, Secret.GUILD_ID)
-        // bot.helpers.createGlobalApplicationCommand(command)
-    })
-)
-await bot.helpers.upsertGuildApplicationCommands(Secret.GUILD_ID, commands)
-// await bot.helpers.upsertGlobalApplicationCommands(commands)
+# AUTOMATIC1111's Web UI
+host: http://localhost:7860
 ```
 
-を
-
-```ts
-await Promise.all(
-    commands.map((command) => {
-        // bot.helpers.createGuildApplicationCommand(command, Secret.GUILD_ID)
-        bot.helpers.createGlobalApplicationCommand(command)
-    })
-)
-// await bot.helpers.upsertGuildApplicationCommands(Secret.GUILD_ID, commands)
-await bot.helpers.upsertGlobalApplicationCommands(commands)
-```
-
-の様に変更します。
-
-これで多分スラッシュコマンドがグローバルに反映されると思います。ただし、キャッシュの時間が長いため、一度グローバルで反映されると数時間は変更できなくなるので注意です。
+- DISCORD_TOKEN: BOTのトークン
+- GUILD_ID: BOTを動かすサーバー
+- globalCommands: グローバルでスラッシュコマンドを有効にするかどうか
+- allows: 実行を許可するコマンド名
+- host: Web UI のアドレス
 
 ## 実行
-
-Deno が必要です。なければ入れてください。いつかDockerで動くようにするかもしれません。しないかもしれません。
-
-入れたら、
 
 ```bash
 deno task start
 ```
 
-で動きます。
+で実行します。`Ctrl + C` で停止です。
