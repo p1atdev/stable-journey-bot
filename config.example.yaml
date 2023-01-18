@@ -2,7 +2,8 @@
 DISCORD_TOKEN: hogehoge
 GUILD_ID: 1234567890
 
-# BOT privilege
+# BOT
+globalCommands: false
 allows:
   - switch
   - refresh

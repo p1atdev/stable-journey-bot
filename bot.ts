@@ -8,16 +8,20 @@ import { base64ToBlob } from "./utils.ts"
 export interface StableJourneyBotOptions {
     DISCORD_TOKEN: string
     GUILD_ID: string
+    globalCommands: boolean
     allows: string[]
     host: string
 }
 
 export class StableJourneyBot {
+    private readonly options: StableJourneyBotOptions
     private readonly client: AUTO1111
     private readonly bot: Bot
     private promptStyles: PromptStyle[] = []
 
-    constructor({ host, DISCORD_TOKEN }: StableJourneyBotOptions) {
+    constructor(options: StableJourneyBotOptions) {
+        const { DISCORD_TOKEN, host } = options
+        this.options = options
         this.bot = createBot({
             token: DISCORD_TOKEN,
             intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
@@ -42,7 +46,13 @@ export class StableJourneyBot {
 
     private refreshCommands = async () => {
         const commands = createCommands(...(await this.refreshParameters()))
-        await registerCommands(this.bot, commands, false)
+
+        await registerCommands(
+            this.bot,
+            commands.filter((command) => this.options.allows.includes(command.name)),
+            this.options.GUILD_ID,
+            this.options.globalCommands
+        )
         log.info("Commands refreshed")
     }
 

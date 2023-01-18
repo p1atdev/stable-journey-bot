@@ -7,6 +7,7 @@ const config = yaml.parse(configFile)
 const configSchema = z.object({
     DISCORD_TOKEN: z.string(),
     GUILD_ID: z.string(),
+    globalCommands: z.boolean(),
     allows: z.array(z.string()),
     host: z.string(),
 })

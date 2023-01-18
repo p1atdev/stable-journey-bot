@@ -2,7 +2,6 @@ import { Bot, CreateSlashApplicationCommand, ApplicationCommandOptionTypes } fro
 import { PromptStyle } from "./types/promptStyle.ts"
 import { Sampler } from "./types/sampler.ts"
 import { SDModel } from "./types/sdModel.ts"
-import { Secret } from "./secret.ts"
 
 const createSwitchModelCommand = (sdModels: SDModel[]) => {
     const switchModelCommand: CreateSlashApplicationCommand = {
@@ -133,15 +132,20 @@ export const createCommands = (sdModels: SDModel[], samplers: Sampler[], promptS
     return commands
 }
 
-export const registerCommands = async (bot: Bot, commands: CreateSlashApplicationCommand[], global: boolean) => {
+export const registerCommands = async (
+    bot: Bot,
+    commands: CreateSlashApplicationCommand[],
+    guildId: string,
+    global: boolean
+) => {
     const current = global
         ? await bot.helpers.getGlobalApplicationCommands()
-        : await bot.helpers.getGuildApplicationCommands(Secret.GUILD_ID)
+        : await bot.helpers.getGuildApplicationCommands(guildId)
     current.forEach(async (command) => {
         if (global) {
             await bot.helpers.deleteGlobalApplicationCommand(command.id)
         } else {
-            await bot.helpers.deleteGuildApplicationCommand(command.id, Secret.GUILD_ID)
+            await bot.helpers.deleteGuildApplicationCommand(command.id, guildId)
         }
     })
 
@@ -152,7 +156,7 @@ export const registerCommands = async (bot: Bot, commands: CreateSlashApplicatio
                 await bot.helpers.createGlobalApplicationCommand(command)
             } else {
                 // await bot.helpers.deleteGuildApplicationCommand(command.name, Secret.GUILD_ID)
-                await bot.helpers.createGuildApplicationCommand(command, Secret.GUILD_ID)
+                await bot.helpers.createGuildApplicationCommand(command, guildId)
             }
         })
     )
@@ -160,6 +164,6 @@ export const registerCommands = async (bot: Bot, commands: CreateSlashApplicatio
     if (global) {
         await bot.helpers.upsertGlobalApplicationCommands(commands)
     } else {
-        await bot.helpers.upsertGuildApplicationCommands(Secret.GUILD_ID, commands)
+        await bot.helpers.upsertGuildApplicationCommands(guildId, commands)
     }
 }
