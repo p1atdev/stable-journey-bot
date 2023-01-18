@@ -1,12 +1,7 @@
 import { AUTO1111, ImagineOptions } from "./auto1111.ts"
-import {
-    createBot,
-    Intents,
-    startBot,
-    CreateSlashApplicationCommand,
-    InteractionResponseTypes,
-    ApplicationCommandOptionTypes,
-} from "./deps.ts"
+import { createCommands, registerCommands } from "./command.ts"
+import { createBot, Intents, startBot, InteractionResponseTypes } from "./deps.ts"
+import { log } from "./log.ts"
 import { Secret } from "./secret.ts"
 import { base64ToBlob } from "./utils.ts"
 
@@ -15,12 +10,6 @@ const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN")!
 const client = new AUTO1111({
     host: Secret.AUTO1111_Host,
 })
-
-const [sdModels, samplers, promptStyles] = await Promise.all([
-    client.sdModels(),
-    client.samplers(),
-    client.promptStyles(),
-])
 
 const bot = createBot({
     token: DISCORD_TOKEN,
@@ -32,118 +21,24 @@ const bot = createBot({
     },
 })
 
-const switchModelCommand: CreateSlashApplicationCommand = {
-    name: "switch",
-    description: "Switch stable diffusion model",
-    options: [
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "name",
-            description: "Stable diffusion model name",
-            choices: (sdModels.length > 25 ? sdModels.slice(0, 25) : sdModels).map((model) => ({
-                name: model.model_name,
-                value: model.title,
-            })),
-            required: true,
-        },
-    ],
+const refreshParameters = async () => {
+    await client.refreshCheckpoints()
+
+    return await Promise.all([client.sdModels(), client.samplers(), client.promptStyles()])
 }
 
-const imagineCommand: CreateSlashApplicationCommand = {
-    name: "imagine",
-    description: "Thinking to the world of dreams...",
-    options: [
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "prompt",
-            description: "Positive prompt",
-            required: true,
-        },
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "negative",
-            description: "Negative prompt",
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "prompt-style",
-            description: "Prompt style",
-            choices: promptStyles.map((style) => ({
-                name: style.name,
-                value: style.name,
-            })),
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "aspect",
-            description: "Aspect ratio",
-            choices: [
-                {
-                    name: "2:3",
-                    value: "2:3",
-                },
-                {
-                    name: "1:1",
-                    value: "1:1",
-                },
-                {
-                    name: "3:2",
-                    value: "3:2",
-                },
-            ],
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.Integer,
-            name: "seed",
-            description: "Like finding a single shining star in the vastness of space",
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.String,
-            name: "sampler",
-            description: "Sampling method",
-            choices: (samplers.length > 25 ? samplers.slice(0, 25) : samplers).map((sampler) => ({
-                name: sampler.name,
-                value: sampler.name,
-            })),
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.Integer,
-            name: "steps",
-            description: "Number of steps",
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.Number,
-            name: "scale",
-            description: "CFG scale",
-            required: false,
-        },
-        {
-            type: ApplicationCommandOptionTypes.Integer,
-            name: "count",
-            description: "Number of images to generate",
-            required: false,
-            minValue: 1,
-            maxValue: 4,
-        },
-    ],
+const [_sdModels, _samplers, promptStyles] = await refreshParameters()
+
+const refreshCommands = async () => {
+    const commands = createCommands(...(await refreshParameters()))
+    await registerCommands(bot, commands, false)
+    log.info("Commands refreshed")
 }
 
-const commands = [imagineCommand, switchModelCommand]
-
-await Promise.all(
-    commands.map((command) => {
-        bot.helpers.createGuildApplicationCommand(command, Secret.GUILD_ID)
-        // bot.helpers.createGlobalApplicationCommand(command)
-    })
-)
-await bot.helpers.upsertGuildApplicationCommands(Secret.GUILD_ID, commands)
-// await bot.helpers.upsertGlobalApplicationCommands(commands)
+bot.events.ready = async () => {
+    log.success("Successfully connected to gateway")
+    await refreshCommands()
+}
 
 bot.events.interactionCreate = async (b, interaction) => {
     switch (interaction.data?.name) {
@@ -163,6 +58,8 @@ bot.events.interactionCreate = async (b, interaction) => {
                 return
             }
 
+            log.info(`Switching model from ${auto1111options.sd_model_checkpoint} to ${model?.value}...`)
+
             await b.helpers.sendInteractionResponse(interaction.id, interaction.token, {
                 type: InteractionResponseTypes.ChannelMessageWithSource,
                 data: {
@@ -175,6 +72,8 @@ bot.events.interactionCreate = async (b, interaction) => {
             await b.helpers.editOriginalInteractionResponse(interaction.token, {
                 content: `✅ Model switched to **${model?.value}** successfully!`,
             })
+
+            log.info(`Model switched to ${model?.value} successfully!`)
 
             break
         }
@@ -213,6 +112,8 @@ bot.events.interactionCreate = async (b, interaction) => {
                 count: interaction.data.options?.find((o) => o.name === "count")?.value as number,
             }
 
+            log.info("Imagine:", options)
+
             const promptStyleName = interaction.data.options?.find((o) => o.name === "prompt-style")?.value
             if (typeof promptStyleName === "string") {
                 const promptStyle = promptStyles.find((style) => style.name === promptStyleName)
@@ -237,6 +138,9 @@ bot.events.interactionCreate = async (b, interaction) => {
                 while (!finished) {
                     await new Promise((resolve) => setTimeout(resolve, 500))
                     const progress = await client.progress()
+                    if (progress.progress === 0) {
+                        continue
+                    }
                     await b.helpers.editOriginalInteractionResponse(interaction.token, {
                         content: `${paramerters}\n${(progress.progress * 100).toFixed(
                             1
@@ -256,6 +160,26 @@ bot.events.interactionCreate = async (b, interaction) => {
                     blob: base64ToBlob(image, "image/png"),
                 })),
             })
+
+            break
+        }
+        case "refresh": {
+            log.info("Refreshing...")
+
+            await b.helpers.sendInteractionResponse(interaction.id, interaction.token, {
+                type: InteractionResponseTypes.ChannelMessageWithSource,
+                data: {
+                    content: "Refreshing...",
+                },
+            })
+
+            await refreshCommands()
+
+            await b.helpers.editOriginalInteractionResponse(interaction.token, {
+                content: "✅ Refreshed!",
+            })
+
+            log.info("Refreshed")
 
             break
         }
