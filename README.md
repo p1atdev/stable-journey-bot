@@ -5,6 +5,13 @@ Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.c
 
 ![image](https://user-images.githubusercontent.com/60182057/213064092-6a1e057c-3cfd-48f6-8c59-9c14359b00b2.png)
 
+# 機能
+
+- Prompt Style のサポート
+- ネガティブプロンプト
+- サンプラーの選択
+- モデルの切り替え
+- 複数枚生成
 
 # 使い方
 
@@ -87,3 +94,41 @@ deno task start
 ```
 
 で実行します。`Ctrl + C` で停止です。
+
+# コマンド一覧
+
+## `/switch`
+
+モデルを切り替えます。
+
+![image](https://user-images.githubusercontent.com/60182057/213064974-ad051a83-608b-48c0-9181-8bf5d9aa9213.png)
+
+- name: モデル名 (必須)
+
+## `/refresh`
+
+モデルなどをリフレッシュします。
+
+`Stable-diffusion` ディレクトリにモデルを追加したり削除した場合は、これを実行しないとモデルを切り替えることが出来ません。
+
+## `/imagine`
+
+生成します。
+
+![image](https://user-images.githubusercontent.com/60182057/213065275-6415aaa3-d3f8-4f27-af8b-f7d86fc2c6b2.png)
+
+- prompt: ポジティブプロンプト (必須)
+- negative: ネガティブプロンプト
+- prompt-style: プロンプトスタイル。入力されたプロンプトの先頭に挿入されます。
+- aspect: アスペクト比。`2:3`、`1:1`、`3:2` があります。
+- seed: シード値
+- sampler: サンプラー
+- steps: ステップ数
+- scale: CFG scale
+- count: 生成枚数。最大は 4。
+
+
+# TODO
+
+- `/imagine` のデフォルト値の設定
+- アスペクト比や生成枚数をカスタマイズできるように
