@@ -32,31 +32,36 @@ export class AUTO1111 {
     }
 
     sdModels = async () => {
-        const res = await fetch(`${this.host}/sdapi/v1/sd-models`)
+        const url = new URL("/sdapi/v1/sd-models", this.host)
+        const res = await fetch(url)
         const data: SDModel[] = await res.json()
         return data
     }
 
     samplers = async () => {
-        const res = await fetch(`${this.host}/sdapi/v1/samplers`)
+        const url = new URL("/sdapi/v1/samplers", this.host)
+        const res = await fetch(url)
         const data: Sampler[] = await res.json()
         return data
     }
 
     promptStyles = async () => {
-        const res = await fetch(`${this.host}/sdapi/v1/prompt-styles`)
+        const url = new URL("/sdapi/v1/prompt-styles", this.host)
+        const res = await fetch(url)
         const data: PromptStyle[] = await res.json()
         return data
     }
 
     options = async () => {
-        const res = await fetch(`${this.host}/sdapi/v1/options`)
+        const url = new URL("/sdapi/v1/options", this.host)
+        const res = await fetch(url)
         const data: SDAPIOptions = await res.json()
         return data
     }
 
     switchModel = async (modelName: string) => {
-        const res = await fetch(`${this.host}/sdapi/v1/options`, {
+        const url = new URL("/sdapi/v1/options", this.host)
+        const res = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -105,7 +110,8 @@ export class AUTO1111 {
             }
         }
 
-        const res = await fetch(`${this.host}/sdapi/v1/txt2img`, {
+        const url = new URL("/sdapi/v1/txt2img", this.host)
+        const res = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -119,7 +125,8 @@ export class AUTO1111 {
     }
 
     progress = async () => {
-        const res = await fetch(`${this.host}/sdapi/v1/progress`)
+        const url = new URL("/sdapi/v1/progress", this.host)
+        const res = await fetch(url)
         const data: Progress = await res.json()
         return data
     }
