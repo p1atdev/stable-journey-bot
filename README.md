@@ -15,6 +15,14 @@ Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.c
 
 # 使い方
 
+## プロジェクトのクローン
+レポを落として、ルートに移動します。
+
+```bash
+git clone https://github.com/p1atdev/stable-journey-bot.git
+cd stable-journey-bot
+```
+
 ## Web UIの準備
 
 必要に合わせて起動フラグに以下を追加します
