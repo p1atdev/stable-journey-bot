@@ -1,6 +1,6 @@
 import { AUTO1111, ImagineOptions } from "./auto1111.ts"
 import { createCommands, registerCommands } from "./command.ts"
-import { Bot, createBot, Intents, startBot, InteractionResponseTypes } from "./deps.ts"
+import { Bot, createBot, startBot, InteractionResponseTypes } from "./deps.ts"
 import { log } from "./log.ts"
 import { PromptStyle } from "./types/promptStyle.ts"
 import { base64ToBlob } from "./utils.ts"
@@ -27,7 +27,7 @@ export class StableJourneyBot {
         this.options = options
         this.bot = createBot({
             token: DISCORD_TOKEN,
-            intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
+            intents: undefined,
         })
         this.client = new AUTO1111({
             host,
