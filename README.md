@@ -85,6 +85,10 @@ allows:
   - refresh
   - imagine
 
+defaultStyle: Low Quality + Bad Anatomy
+defaultAspect: "2:3"
+defaultSampler: DPM++ 2M Karras
+
 # AUTOMATIC1111's Web UI
 host: http://localhost:7860
 ```
@@ -93,6 +97,9 @@ host: http://localhost:7860
 - GUILD_ID: BOTを動かすサーバー
 - globalCommands: グローバルでスラッシュコマンドを有効にするかどうか
 - allows: 実行を許可するコマンド名
+- defaultStyle: デフォルトで使用する Prompt Style の名前
+- defaultAspect: デフォルトのアスペクト比
+- defaultSampler: デフォルトで使用するサンプラー
 - host: Web UI のアドレス
 
 ## 実行
