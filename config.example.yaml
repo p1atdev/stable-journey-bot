@@ -9,5 +9,9 @@ allows:
   - refresh
   - imagine
 
+defaultStyle: Low Quality + Bad Anatomy
+defaultAspect: "2:3"
+defaultSampler: DPM++ 2M Karras
+
 # AUTOMATIC1111's Web UI
 host: http://localhost:7860

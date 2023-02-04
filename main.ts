@@ -9,6 +9,9 @@ const configSchema = z.object({
     GUILD_ID: z.string(),
     globalCommands: z.boolean(),
     allows: z.array(z.string()),
+    defaultStyle: z.string(),
+    defaultAspect: z.string(),
+    defaultSampler: z.string(),
     host: z.string(),
 })
 

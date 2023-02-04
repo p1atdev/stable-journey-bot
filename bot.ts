@@ -10,6 +10,9 @@ export interface StableJourneyBotOptions {
     GUILD_ID: string
     globalCommands: boolean
     allows: string[]
+    defaultStyle: string
+    defaultAspect: string
+    defaultSampler: string
     host: string
 }
 
@@ -115,7 +118,9 @@ export class StableJourneyBot {
                         prompt: interaction.data.options?.find((o) => o.name === "prompt")?.value as string,
                         negativePrompt: interaction.data.options?.find((o) => o.name === "negative")?.value as string,
                         aspect: (() => {
-                            const value = interaction.data.options?.find((o) => o.name === "aspect")?.value as string
+                            const value =
+                                interaction.data.options?.find((o) => o.name === "aspect")?.value ??
+                                this.options.defaultAspect
                             switch (value) {
                                 case "2:3":
                                 case "1:1":
@@ -128,7 +133,10 @@ export class StableJourneyBot {
                             }
                         })(),
                         seed: interaction.data.options?.find((o) => o.name === "seed")?.value as number,
-                        sampler: interaction.data.options?.find((o) => o.name === "sampler")?.value as string,
+                        sampler:
+                            (interaction.data.options?.find((o) => o.name === "sampler")?.value as
+                                | string
+                                | undefined) ?? this.options.defaultSampler,
                         steps: interaction.data.options?.find((o) => o.name === "steps")?.value as number,
                         scale: interaction.data.options?.find((o) => o.name === "scale")?.value as number,
                         count: interaction.data.options?.find((o) => o.name === "count")?.value as number,
@@ -136,7 +144,9 @@ export class StableJourneyBot {
 
                     log.info("Imagine:", options)
 
-                    const promptStyleName = interaction.data.options?.find((o) => o.name === "prompt-style")?.value
+                    const promptStyleName =
+                        interaction.data.options?.find((o) => o.name === "prompt-style")?.value ??
+                        this.options.defaultStyle
                     if (typeof promptStyleName === "string") {
                         const promptStyle = this.promptStyles.find((style) => style.name === promptStyleName)
                         if (promptStyle) {
