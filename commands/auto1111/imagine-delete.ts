@@ -19,6 +19,7 @@ export default (): ActionRowCommand => {
 
             log.info("Result deleted:", targetMessage)
 
+            // TODO: どうにかしてメッセージを削除する
             await b.helpers.deleteOriginalInteractionResponse(interaction.token)
             // await b.helpers.deleteOriginalInteractionResponse(interaction.token)
         },

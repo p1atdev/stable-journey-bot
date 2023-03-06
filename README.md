@@ -3,15 +3,19 @@
 Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 
-![image](https://user-images.githubusercontent.com/60182057/213064092-6a1e057c-3cfd-48f6-8c59-9c14359b00b2.png)
+![image](https://user-images.githubusercontent.com/60182057/223119269-bf78d3fb-e2e7-4c65-992f-3ceca0a582ef.png)
+
 
 # 機能
 
 - Prompt Style のサポート
+- プロンプトプリセット
 - ネガティブプロンプト
 - サンプラーの選択
 - モデルの切り替え
 - 複数枚生成
+- リローリング
+- highres fix
 
 # 使い方
 
@@ -46,7 +50,7 @@ set PYTHON=
 set GIT=
 set VENV_DIR=
 set COMMANDLINE_ARGS=--xformers --api --nowebui
-set ATTN_PRECISION=fp16
+set ATTN_PRECISION=
 
 call webui.bat
 ```
@@ -62,7 +66,7 @@ set PYTHON=
 set GIT=
 set VENV_DIR=
 set COMMANDLINE_ARGS=--xformers --api --share
-set ATTN_PRECISION=fp16
+set ATTN_PRECISION=
 
 call webui.bat
 ```
@@ -84,12 +88,25 @@ allows:
   - switch
   - refresh
   - imagine
+  # - neko
 
-defaultStyle: Low Quality + Bad Anatomy
-defaultAspect: "2:3"
-defaultSampler: DPM++ 2M Karras
+defaultParameters:
+  style: ""
+  sampler: "DPM++ 2M Karras"
+  width: 512
+  height: 768
+  highresFix: false 
+  clipSkip: 2 # not working...?
 
-# AUTOMATIC1111's Web UI
+additionalParameters:
+  promptPrefix: "masterpiece, exceptional"
+  promptSuffix: "ultra detailed"
+  negativePromptPrefix: "NSFW, badquality, bad anatomy"
+  negativePromptSuffix: ""
+
+serverType: "AUTOMATIC1111"
+
+# API server address
 host: http://localhost:7860
 ```
 
@@ -97,9 +114,22 @@ host: http://localhost:7860
 - GUILD_ID: BOTを動かすサーバー
 - globalCommands: グローバルでスラッシュコマンドを有効にするかどうか
 - allows: 実行を許可するコマンド名
-- defaultStyle: デフォルトで使用する Prompt Style の名前
-- defaultAspect: デフォルトのアスペクト比
-- defaultSampler: デフォルトで使用するサンプラー
+  
+- defaultParameters: デフォルトのパラメーター。 `/imagine` で指定されない場合は、この値が使われる。
+  - style: デフォルトで使用する Prompt Style の名前
+  - widht: 幅
+  - height: 高さ
+  - highresFix: highres fix を有効にする
+  - ckipSkip: CLIP skip の値を変更する
+
+- additionalParameters:
+  - promptPrefix: 常に prompt の先頭に追加する内容
+  - promptSuffix: 常に prompt の後ろに追加する内容
+  - negativePromptPrefix: 常に negative prompt の先頭に追加する内容
+  - negativePromptSuffix: 常に negative prompt の後ろに追加する内容
+
+- serverType: 現状は常に `AUTOMATIC1111`。いつかほかのに対応するかも？しないかも？
+
 - host: Web UI のアドレス
 
 ## 実行
@@ -116,7 +146,8 @@ deno task start
 
 モデルを切り替えます。
 
-![image](https://user-images.githubusercontent.com/60182057/213064974-ad051a83-608b-48c0-9181-8bf5d9aa9213.png)
+![image](https://user-images.githubusercontent.com/60182057/223106074-854f2f98-efd8-400b-a8ec-9971a02621da.jpg)
+
 
 - name: モデル名 (必須)
 
@@ -130,20 +161,28 @@ deno task start
 
 生成します。
 
-![image](https://user-images.githubusercontent.com/60182057/213065275-6415aaa3-d3f8-4f27-af8b-f7d86fc2c6b2.png)
+![image](https://user-images.githubusercontent.com/60182057/223117900-97202b90-8f1c-4629-888e-8e99dd683bb7.jpg)
 
 - prompt: ポジティブプロンプト (必須)
 - negative: ネガティブプロンプト
 - prompt-style: プロンプトスタイル。入力されたプロンプトの先頭に挿入されます。
-- aspect: アスペクト比。`2:3`、`1:1`、`3:2` があります。
+- width: 幅。512, 768, ~ 2048 まででキリがいいものを入れてます。
+- height: 高さ。width 同様
 - seed: シード値
 - sampler: サンプラー
 - steps: ステップ数
 - scale: CFG scale
+- highres-fix: highres fix を有効にします
+- clip-skip: CLIP skip を変更します
 - count: 生成枚数。最大は 4。
 
 
 # TODO
 
-- `/imagine` のデフォルト値の設定
-- アスペクト比や生成枚数をカスタマイズできるように
+- [x] `/imagine` のデフォルト値の設定
+- [x] アスペクト比や生成枚数をカスタマイズできるように
+- [ ] 生成したものの削除
+- [ ] エラーハンドリング
+- [ ] リローリング、バリエーション (midjourney風に)
+- [ ] img2img
+- [ ] Lsmith?

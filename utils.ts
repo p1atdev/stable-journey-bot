@@ -25,7 +25,9 @@ export const refreshCommands = async (bot: Bot, options: StableJourneyBotOptions
             const commands = await createAUTO1111Commands({
                 options,
             })
-            const slashCommands = [...commands.slash, ...commonCommands]
+            const slashCommands = [...commands.slash, ...commonCommands].filter((command) =>
+                options.allows.includes(command.command.name)
+            )
             await registerCommands(bot, slashCommands, commands.actionRow, options.GUILD_ID, options.globalCommands)
             break
         }
