@@ -1,9 +1,17 @@
-import { ApplicationCommandOptionTypes, InteractionResponseTypes } from "../../deps.ts"
-import { SDModel, StableJourneyBotOptions, SlashCommand, PromptStyle } from "../../types/mod.ts"
+import {
+    ApplicationCommandOptionTypes,
+    InteractionResponseTypes,
+    transformEmbed,
+    MessageComponentTypes,
+    ButtonStyles,
+} from "../../deps.ts"
+import { StableJourneyBotOptions, SlashCommand, PromptStyle } from "../../types/mod.ts"
 import { AUTO1111, ImagineOptions } from "../../auto1111.ts"
 import { log } from "../../log.ts"
 import { base64ToBlob } from "../../utils.ts"
 import { Sampler } from "../../types/sampler.ts"
+import { SizeNumbers } from "../../types/botOptions.ts"
+import { EmbedColor } from "../../message.ts"
 
 interface Props {
     client: AUTO1111
@@ -12,7 +20,7 @@ interface Props {
     options: StableJourneyBotOptions
 }
 
-export default ({ client, samplers, promptStyles, options }: Props): SlashCommand => {
+export default ({ client, samplers, promptStyles, options: botOptions }: Props): SlashCommand => {
     return {
         command: {
             name: "imagine",
@@ -41,23 +49,23 @@ export default ({ client, samplers, promptStyles, options }: Props): SlashComman
                     required: false,
                 },
                 {
-                    type: ApplicationCommandOptionTypes.String,
-                    name: "aspect",
-                    description: "Aspect ratio",
-                    choices: [
-                        {
-                            name: "2:3",
-                            value: "2:3",
-                        },
-                        {
-                            name: "1:1",
-                            value: "1:1",
-                        },
-                        {
-                            name: "3:2",
-                            value: "3:2",
-                        },
-                    ],
+                    type: ApplicationCommandOptionTypes.Integer,
+                    name: "width",
+                    description: "Image width",
+                    choices: SizeNumbers.map((size) => ({
+                        name: size.toString(),
+                        value: size,
+                    })),
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionTypes.Integer,
+                    name: "height",
+                    description: "Image height",
+                    choices: SizeNumbers.map((size) => ({
+                        name: size.toString(),
+                        value: size,
+                    })),
                     required: false,
                 },
                 {
@@ -96,6 +104,18 @@ export default ({ client, samplers, promptStyles, options }: Props): SlashComman
                     minValue: 1,
                     maxValue: 4,
                 },
+                {
+                    type: ApplicationCommandOptionTypes.Boolean,
+                    name: "highres-fix",
+                    description: "High resolution fix",
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionTypes.Integer,
+                    name: "clip-skip",
+                    description: "Clip skip",
+                    required: false,
+                },
             ],
         },
         action: async (b, interaction) => {
@@ -103,54 +123,109 @@ export default ({ client, samplers, promptStyles, options }: Props): SlashComman
                 return
             }
 
-            const paramerters = `${interaction.data.options
-                ?.map((option) => `${option.name}: \`${option.value}\``)
-                .join("\n")}`
+            const author = interaction.user
+
+            const params: Record<string, any> = {}
+            interaction.data.options?.forEach((option) => {
+                if (!option.value) return
+                params[option.name] = option.value
+            })
+
+            log.info("params:", params)
 
             await b.helpers.sendInteractionResponse(interaction.id, interaction.token, {
                 type: InteractionResponseTypes.ChannelMessageWithSource,
                 data: {
-                    content: `\n${paramerters}`,
+                    embeds: [
+                        {
+                            title: "Generating...",
+                            color: EmbedColor.blue,
+                        },
+                    ],
                 },
             })
 
-            const imagineOptions: ImagineOptions = {
-                prompt: interaction.data.options?.find((o) => o.name === "prompt")?.value as string,
-                negativePrompt: interaction.data.options?.find((o) => o.name === "negative")?.value as string,
-                aspect: (() => {
-                    const value =
-                        interaction.data.options?.find((o) => o.name === "aspect")?.value ?? options.defaultAspect
-                    switch (value) {
-                        case "2:3":
-                        case "1:1":
-                        case "3:2": {
-                            return value
-                        }
-                        default: {
-                            return "1:1"
-                        }
-                    }
-                })(),
-                seed: interaction.data.options?.find((o) => o.name === "seed")?.value as number,
-                sampler:
-                    (interaction.data.options?.find((o) => o.name === "sampler")?.value as string | undefined) ??
-                    options.defaultSampler,
-                steps: interaction.data.options?.find((o) => o.name === "steps")?.value as number,
-                scale: interaction.data.options?.find((o) => o.name === "scale")?.value as number,
-                count: interaction.data.options?.find((o) => o.name === "count")?.value as number,
+            const imagineOptions: Partial<ImagineOptions> = {
+                prompt: params["prompt"],
+                negativePrompt: params["negative"],
+                seed: params["seed"],
+                sampler: params["sampler"],
+                steps: params["steps"],
+                scale: params["scale"],
+                width: params["width"],
+                height: params["height"],
+                highresFix: params["highres-fix"],
+                clipSkip: params["clip-skip"],
+                count: params["count"],
             }
 
-            log.info("Imagine:", options)
-
-            const promptStyleName =
-                interaction.data.options?.find((o) => o.name === "prompt-style")?.value ?? options.defaultStyle
-            if (typeof promptStyleName === "string") {
-                const promptStyle = promptStyles.find((style) => style.name === promptStyleName)
+            if (params["prompt-style"]) {
+                const promptStyle = promptStyles.find((style) => style.name === params["prompt-style"])
                 if (promptStyle) {
                     imagineOptions.prompt = promptStyle.prompt + imagineOptions.prompt
                     imagineOptions.negativePrompt = promptStyle.negative_prompt + imagineOptions.negativePrompt
                 }
+            } else {
+                const promptStyle = promptStyles.find((style) => style.name === botOptions.defaultParameters.style)
+                if (promptStyle) {
+                    imagineOptions.prompt = promptStyle.prompt + imagineOptions.prompt
+                    imagineOptions.negativePrompt = promptStyle.negative_prompt + imagineOptions.negativePrompt
+                } else {
+                    log.warn("Prompt style not found:", botOptions.defaultParameters.style)
+                    log.warn(
+                        "Available prompt styles:",
+                        promptStyles.map((style) => style.name)
+                    )
+                }
             }
+
+            Object.entries(botOptions.defaultParameters).forEach(([key, value]) => {
+                switch (key) {
+                    case "style": {
+                        break
+                    }
+                    default: {
+                        if (imagineOptions[key] === undefined) {
+                            imagineOptions[key] = value
+                        }
+                        break
+                    }
+                }
+            })
+
+            const additionalParameters = botOptions.additionalParameters
+            if (additionalParameters) {
+                if (additionalParameters.promptPrefix) {
+                    imagineOptions.prompt = [additionalParameters.promptPrefix, imagineOptions.prompt].join(", ")
+                }
+                if (additionalParameters.negativePromptPrefix) {
+                    imagineOptions.negativePrompt = [
+                        additionalParameters.negativePromptPrefix,
+                        imagineOptions.negativePrompt,
+                    ].join(", ")
+                }
+                if (additionalParameters.promptSuffix) {
+                    imagineOptions.prompt = [imagineOptions.prompt, additionalParameters.promptSuffix].join(", ")
+                }
+                if (additionalParameters.negativePromptSuffix) {
+                    imagineOptions.negativePrompt = [
+                        imagineOptions.negativePrompt,
+                        additionalParameters.negativePromptSuffix,
+                    ].join(", ")
+                }
+            }
+
+            log.info("Imagine:", imagineOptions)
+
+            const paramsFields = Object.entries(imagineOptions)
+                .filter(([_, value]) => {
+                    return value !== undefined
+                })
+                .map(([key, value]) => ({
+                    name: key,
+                    value: `\`${value}\``,
+                    inline: ["prompt", "negativePrompt", "width", "height", "clipSkip"].includes(key),
+                }))
 
             let finished = false
 
@@ -170,10 +245,18 @@ export default ({ client, samplers, promptStyles, options }: Props): SlashComman
                     if (progress.progress === 0) {
                         continue
                     }
+
+                    const progressStr = (progress.progress * 100).toFixed(1)
+                    const eta = progress.eta_relative.toFixed(1)
+
                     await b.helpers.editOriginalInteractionResponse(interaction.token, {
-                        content: `${paramerters}\n${(progress.progress * 100).toFixed(
-                            1
-                        )} % (ETA: ${progress.eta_relative.toFixed(1)} s)`,
+                        content: `Generating for ${author.username} | ${progressStr} % (ETA: ${eta} s)`,
+                        embeds: [
+                            {
+                                fields: paramsFields,
+                                color: EmbedColor.blue,
+                            },
+                        ],
                     })
                 }
             }
@@ -183,11 +266,53 @@ export default ({ client, samplers, promptStyles, options }: Props): SlashComman
             const [result, _] = await Promise.all([imaginating, progress])
 
             await b.helpers.editOriginalInteractionResponse(interaction.token, {
-                content: `${paramerters}\n✅ Done!`,
+                content: `Done! - <@${author.id}>`,
                 file: result.images.map((image) => ({
                     name: "image.png",
                     blob: base64ToBlob(image, "image/png"),
                 })),
+                embeds: [
+                    transformEmbed(b, {
+                        fields: paramsFields,
+                        timestamp: new Date().toISOString(),
+                        color: EmbedColor.green,
+                        footer: {
+                            text: `${author.username}#${author.discriminator} - Click ❌ to delete`,
+                            icon_url: b.helpers.getAvatarURL(author.id, author.discriminator, {
+                                avatar: author.avatar,
+                            }),
+                        },
+                    }),
+                ],
+                components: [
+                    {
+                        type: MessageComponentTypes.ActionRow,
+                        components: [
+                            {
+                                type: MessageComponentTypes.Button,
+                                label: "",
+                                style: ButtonStyles.Secondary,
+                                customId: "imagine:retry",
+                                emoji: {
+                                    name: "🔄",
+                                },
+                            },
+                            // not working yet
+                            // {
+                            //     type: MessageComponentTypes.Button,
+                            //     label: "",
+                            //     style: ButtonStyles.Secondary,
+                            //     customId: "imagine:delete",
+                            //     emoji: {
+                            //         name: "❌",
+                            //     },
+                            // },
+                        ],
+                    },
+                ],
+                allowedMentions: {
+                    users: [author.id],
+                },
             })
         },
     }

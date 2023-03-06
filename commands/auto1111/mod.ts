@@ -4,6 +4,9 @@ import { StableJourneyBotOptions } from "../../types/mod.ts"
 import imagineCommand from "./imagine.ts"
 import switchCommand from "./switch.ts"
 
+import imagineRetryCommand from "./imagine-retry.ts"
+import imagineDeleteCommand from "./imagine-delete.ts"
+
 interface Props {
     options: StableJourneyBotOptions
 }
@@ -17,16 +20,24 @@ export const createAUTO1111Commands = async ({ options }: Props) => {
         client.samplers(),
     ])
 
-    return [
-        imagineCommand({
-            client,
-            samplers,
-            promptStyles,
-            options,
-        }),
-        switchCommand({
-            client,
-            sdModels,
-        }),
-    ]
+    return {
+        slash: [
+            imagineCommand({
+                client,
+                samplers,
+                promptStyles,
+                options,
+            }),
+            switchCommand({
+                client,
+                sdModels,
+            }),
+        ],
+        actionRow: [
+            imagineRetryCommand({
+                client,
+            }),
+            imagineDeleteCommand(),
+        ],
+    }
 }

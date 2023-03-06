@@ -8,10 +8,23 @@ allows:
   - switch
   - refresh
   - imagine
+  # - neko
 
-defaultStyle: Low Quality + Bad Anatomy
-defaultAspect: "2:3"
-defaultSampler: DPM++ 2M Karras
+defaultParameters:
+  style: ""
+  sampler: "DPM++ 2M Karras"
+  width: 512
+  height: 768
+  highresFix: false
+  clipSkip: 2
+
+additionalParameters:
+  promptPrefix: "masterpiece, exceptional"
+  promptSuffix: "ultra detailed"
+  negativePromptPrefix: "badquality, bad anatomy"
+  negativePromptSuffix: ""
+
+serverType: "AUTOMATIC1111"
 
 # AUTOMATIC1111's Web UI
 host: http://localhost:7860
