@@ -22,7 +22,7 @@ export default ({ options }: Props): SlashCommand => {
                 data: {
                     embeds: [
                         {
-                            title: " Refreshing...",
+                            title: "Refreshing...",
                             color: EmbedColor.blue,
                         },
                     ],
@@ -34,7 +34,8 @@ export default ({ options }: Props): SlashCommand => {
             await b.helpers.editOriginalInteractionResponse(interaction.token, {
                 embeds: [
                     {
-                        title: "Refreshed",
+                        title: "Done!",
+                        description: "Commands have been refreshed.",
                         color: EmbedColor.green,
                     },
                 ],
