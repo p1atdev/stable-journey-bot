@@ -100,7 +100,7 @@ export class AUTO1111 {
         aspect,
         count,
     }: ImagineOptions): Promise<Txt2ImgRes> => {
-        const reqBody: Txt2ImgOptions = defaultTxt2ImgOptions
+        const reqBody: Partial<Txt2ImgOptions> = defaultTxt2ImgOptions
         reqBody.prompt = prompt
         reqBody.negative_prompt = negativePrompt ?? ""
         reqBody.steps = steps ?? 20

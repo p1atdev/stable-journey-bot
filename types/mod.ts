@@ -5,3 +5,6 @@ export * from "./progress.ts"
 export * from "./interaction.ts"
 export * from "./options.ts"
 export * from "./promptStyle.ts"
+
+export * from "./botOptions.ts"
+export * from "./command.ts"

@@ -3,6 +3,11 @@ export interface Txt2ImgOptions {
     denoising_strength: number
     firstphase_width: number
     firstphase_height: number
+    hr_scale: number
+    hr_upscaler: string
+    hr_second_pass_steps: number
+    hr_resize_x: number
+    hr_resize_y: number
     prompt: string
     styles: string[]
     seed: number
@@ -25,13 +30,20 @@ export interface Txt2ImgOptions {
     s_tmax: number
     s_tmin: number
     s_noise: number
-    override_settings: any
+    override_settings: OverrideSettings
     override_settings_restore_afterwards: boolean
+    script_args: any[]
     sampler_index: string
+    script_name: string
 }
 
-export const defaultTxt2ImgOptions: Txt2ImgOptions = {
+export interface OverrideSettings {}
+
+export const defaultTxt2ImgOptions: Partial<Txt2ImgOptions> = {
     enable_hr: false,
+    hr_scale: 1.5,
+    hr_upscaler: "Latent",
+
     denoising_strength: 0.0,
     firstphase_width: 0,
     firstphase_height: 0,

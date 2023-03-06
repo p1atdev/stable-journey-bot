@@ -12,6 +12,7 @@ const configSchema = z.object({
     defaultStyle: z.string(),
     defaultAspect: z.string(),
     defaultSampler: z.string(),
+    serverType: z.union([z.literal("AUTOMATIC1111"), z.literal("Lsmith")]),
     host: z.string(),
 })
 
