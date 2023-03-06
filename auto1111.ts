@@ -1,3 +1,5 @@
+import { log } from "./log.ts"
+import { SizeNumber } from "./types/mod.ts"
 import {
     Sampler,
     SDModel,
@@ -13,14 +15,17 @@ export interface AUTO1111Options {
     host: string
 }
 
-export interface ImagineOptions {
+export interface ImagineOptions extends Record<string, any> {
     prompt: string
     negativePrompt: string
     steps: number
     scale: number
     seed: number
     sampler: string
-    aspect: "2:3" | "1:1" | "3:2"
+    width: SizeNumber
+    height: SizeNumber
+    highresFix: boolean
+    clipSkip: number
     count: number
 }
 
@@ -97,34 +102,34 @@ export class AUTO1111 {
         scale,
         seed,
         sampler,
-        aspect,
+        width,
+        height,
+        highresFix,
+        clipSkip,
         count,
-    }: ImagineOptions): Promise<Txt2ImgRes> => {
-        const reqBody: Txt2ImgOptions = defaultTxt2ImgOptions
-        reqBody.prompt = prompt
-        reqBody.negative_prompt = negativePrompt ?? ""
-        reqBody.steps = steps ?? 20
-        reqBody.cfg_scale = scale ?? 7.0
-        reqBody.seed = seed ?? -1
-        reqBody.sampler_name = sampler ?? "Euler a"
-        reqBody.batch_size = count ?? 1
-        switch (aspect) {
-            case "2:3": {
-                reqBody.width = 512
-                reqBody.height = 768
-                break
-            }
-            case "1:1": {
-                reqBody.width = 512
-                reqBody.height = 512
-                break
-            }
-            case "3:2": {
-                reqBody.width = 768
-                reqBody.height = 512
-                break
-            }
+    }: Partial<ImagineOptions>): Promise<Txt2ImgRes> => {
+        const reqBody: Partial<Txt2ImgOptions> = structuredClone(defaultTxt2ImgOptions)
+        if (prompt !== undefined) reqBody.prompt = prompt
+        if (negativePrompt !== undefined) reqBody.negative_prompt = negativePrompt
+        if (steps !== undefined) reqBody.steps = steps
+        if (scale !== undefined) reqBody.cfg_scale = scale
+        if (seed !== undefined) reqBody.seed = seed
+        if (sampler !== undefined) reqBody.sampler_name = sampler
+        if (width !== undefined) reqBody.width = width
+        if (height !== undefined) reqBody.height = height
+        if (count !== undefined) reqBody.n_iter = count
+        if (highresFix !== undefined) {
+            reqBody.enable_hr = highresFix
         }
+
+        reqBody.override_settings = {}
+        reqBody.override_settings_restore_afterwards = true
+
+        if (clipSkip !== undefined) {
+            reqBody.override_settings.CLIP_stop_at_last_layers = clipSkip
+        }
+
+        // log.info("Imagine parameters:", reqBody)
 
         const url = new URL("/sdapi/v1/txt2img", this.host)
         const res = await fetch(url, {

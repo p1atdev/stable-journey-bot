@@ -3,6 +3,11 @@ export interface Txt2ImgOptions {
     denoising_strength: number
     firstphase_width: number
     firstphase_height: number
+    hr_scale: number
+    hr_upscaler: string
+    hr_second_pass_steps: number
+    hr_resize_x: number
+    hr_resize_y: number
     prompt: string
     styles: string[]
     seed: number
@@ -25,16 +30,28 @@ export interface Txt2ImgOptions {
     s_tmax: number
     s_tmin: number
     s_noise: number
-    override_settings: any
+    override_settings: Partial<OverrideSettings>
     override_settings_restore_afterwards: boolean
+    script_args: any[]
     sampler_index: string
+    script_name: string
 }
 
-export const defaultTxt2ImgOptions: Txt2ImgOptions = {
+export interface OverrideSettings {
+    CLIP_stop_at_last_layers: number
+}
+
+export const defaultTxt2ImgOptions: Partial<Txt2ImgOptions> = {
     enable_hr: false,
-    denoising_strength: 0.0,
+    hr_scale: 2,
+    hr_upscaler: "Latent",
+    denoising_strength: 0.7,
     firstphase_width: 0,
     firstphase_height: 0,
+    hr_second_pass_steps: 0,
+    hr_resize_x: 0,
+    hr_resize_y: 0,
+
     prompt: "",
     styles: [],
     seed: -1,
@@ -64,38 +81,6 @@ export const defaultTxt2ImgOptions: Txt2ImgOptions = {
 
 export interface Txt2ImgRes {
     images: string[]
-    parameters: Txt2ImgResParameters
+    parameters: Txt2ImgOptions
     info: string
-}
-
-export interface Txt2ImgResParameters {
-    enable_hr: boolean
-    denoising_strength: number
-    firstphase_width: number
-    firstphase_height: number
-    prompt: string
-    styles: string[]
-    seed: number
-    subseed: number
-    subseed_strength: number
-    seed_resize_from_h: number
-    seed_resize_from_w: number
-    sampler_name: string
-    batch_size: number
-    n_iter: number
-    steps: number
-    cfg_scale: number
-    width: number
-    height: number
-    restore_faces: boolean
-    tiling: boolean
-    negative_prompt: string
-    eta: number
-    s_churn: number
-    s_tmax: number
-    s_tmin: number
-    s_noise: number
-    override_settings: any
-    override_settings_restore_afterwards: boolean
-    sampler_index: string
 }
