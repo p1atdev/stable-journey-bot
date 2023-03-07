@@ -123,7 +123,7 @@ export default ({ client }: Props): ActionRowCommand => {
                             timestamp: new Date().toISOString(),
                             color: EmbedColor.green,
                             footer: {
-                                text: `${author.username}#${author.discriminator}`, // - Click ❌ to delete`,
+                                text: `${author.username}#${author.discriminator} | Click ❌ to delete`,
                                 icon_url: b.helpers.getAvatarURL(author.id, author.discriminator, {
                                     avatar: author.avatar,
                                 }),
@@ -144,15 +144,15 @@ export default ({ client }: Props): ActionRowCommand => {
                                     },
                                 },
                                 // not working yet
-                                // {
-                                //     type: MessageComponentTypes.Button,
-                                //     label: "",
-                                //     style: ButtonStyles.Secondary,
-                                //     customId: "imagine:delete",
-                                //     emoji: {
-                                //         name: "❌",
-                                //     },
-                                // },
+                                {
+                                    type: MessageComponentTypes.Button,
+                                    label: "",
+                                    style: ButtonStyles.Secondary,
+                                    customId: "imagine:delete",
+                                    emoji: {
+                                        name: "❌",
+                                    },
+                                },
                             ],
                         },
                     ],
