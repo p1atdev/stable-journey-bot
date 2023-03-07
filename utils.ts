@@ -1,8 +1,9 @@
 import { registerCommands } from "./commands.ts"
 import { StableJourneyBotOptions } from "./types/botOptions.ts"
-import { Bot } from "./deps.ts"
+import { Bot, InteractionResponseTypes, Interaction, transformEmbed } from "./deps.ts"
 import { createAUTO1111Commands, createCommonCommands } from "./commands/mod.ts"
 import { log } from "./log.ts"
+import { EmbedColor } from "./message.ts"
 
 export const base64ToBlob = (base64: string, type: string) => {
     const binary = atob(base64)
@@ -59,4 +60,24 @@ export const checkObject = <T extends Record<string, unknown>>(obj: unknown): ob
 export const validateObject = <T extends Record<string, unknown>>(obj: unknown): T => {
     checkObject<T>(obj)
     return obj as T
+}
+
+export const onCommandError = async (b: Bot, interaction: Interaction, title: string, description: string) => {
+    await b.helpers.editOriginalInteractionResponse(interaction.token, {
+        embeds: [
+            transformEmbed(b, {
+                title,
+                description,
+                color: EmbedColor.red,
+                timestamp: new Date().toISOString(),
+            }),
+        ],
+    })
+}
+
+export const checkPerformance = async (fn: () => Promise<void>) => {
+    const start = performance.now()
+    await fn()
+    const end = performance.now()
+    return end - start
 }
