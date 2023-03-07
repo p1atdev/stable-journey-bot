@@ -34,6 +34,10 @@ export default ({ client }: Props): SlashCommand => {
                                     name: "Current Model",
                                     value: auto1111options.sd_model_checkpoint,
                                 },
+                                {
+                                    name: "Current VAE",
+                                    value: auto1111options.sd_vae,
+                                },
                             ],
                             color: EmbedColor.blue,
                         }),
