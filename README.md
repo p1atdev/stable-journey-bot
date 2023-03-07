@@ -80,7 +80,7 @@ call webui.bat
 ```yaml
 # Discord
 DISCORD_TOKEN: hogehoge
-GUILD_ID: 1234567890
+GUILD_ID: "1234567890"
 
 # BOT
 globalCommands: false
@@ -88,6 +88,8 @@ allows:
   - switch
   - refresh
   - imagine
+  - info
+  - status
   # - neko
 
 defaultParameters:
@@ -96,7 +98,7 @@ defaultParameters:
   width: 512
   height: 768
   highresFix: false 
-  clipSkip: 2 # not working...?
+  clipSkip: 2 
 
 additionalParameters:
   promptPrefix: "masterpiece, exceptional"
