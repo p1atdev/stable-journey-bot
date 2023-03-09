@@ -17,7 +17,13 @@ export class StableJourneyBot {
     }
 
     private setup = async () => {
-        await refreshCommands(this.bot, this.options)
+        try {
+            await refreshCommands(this.bot, this.options)
+        } catch (err) {
+            log.error("Error occurred when setting up bot:", err)
+            log.error("Please check your config file or server status and try again!")
+            Deno.exit(1)
+        }
 
         this.bot.events.ready = () => {
             log.success("Successfully connected to gateway")

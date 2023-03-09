@@ -3,7 +3,7 @@
 Discord bot client for AUTOMATIC1111's [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 
-![image](https://user-images.githubusercontent.com/60182057/223119269-bf78d3fb-e2e7-4c65-992f-3ceca0a582ef.png)
+![image](https://user-images.githubusercontent.com/60182057/223954423-3cc031fc-ca7a-4cd3-a377-c54302eabdae.jpg)
 
 
 # 機能
@@ -80,7 +80,7 @@ call webui.bat
 ```yaml
 # Discord
 DISCORD_TOKEN: hogehoge
-GUILD_ID: 1234567890
+GUILD_ID: "1234567890"
 
 # BOT
 globalCommands: false
@@ -88,6 +88,8 @@ allows:
   - switch
   - refresh
   - imagine
+  - info
+  - status
   # - neko
 
 defaultParameters:
@@ -96,7 +98,7 @@ defaultParameters:
   width: 512
   height: 768
   highresFix: false 
-  clipSkip: 2 # not working...?
+  clipSkip: 2 
 
 additionalParameters:
   promptPrefix: "masterpiece, exceptional"

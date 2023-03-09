@@ -17,11 +17,9 @@ export default (): ActionRowCommand => {
                 return
             }
 
-            log.info("Result deleted:", targetMessage)
+            log.info("Result deleted:", targetMessage.id)
 
-            // TODO: どうにかしてメッセージを削除する
-            await b.helpers.deleteOriginalInteractionResponse(interaction.token)
-            // await b.helpers.deleteOriginalInteractionResponse(interaction.token)
+            await b.helpers.deleteMessage(targetMessage.channelId, targetMessage.id)
         },
     }
 }

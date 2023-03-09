@@ -3,6 +3,8 @@ import { StableJourneyBotOptions } from "../../types/mod.ts"
 
 import imagineCommand from "./imagine.ts"
 import switchCommand from "./switch.ts"
+import infoCommand from "./info.ts"
+import statusCommand from "./status.ts"
 
 import imagineRetryCommand from "./imagine-retry.ts"
 import imagineDeleteCommand from "./imagine-delete.ts"
@@ -31,6 +33,12 @@ export const createAUTO1111Commands = async ({ options }: Props) => {
             switchCommand({
                 client,
                 sdModels,
+            }),
+            infoCommand({
+                client,
+            }),
+            statusCommand({
+                client,
             }),
         ],
         actionRow: [
