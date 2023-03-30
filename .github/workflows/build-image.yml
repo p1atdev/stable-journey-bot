@@ -36,7 +36,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v4
         with:
-          images: 'stable-journey-bot'
+          images: 'ghcr.io/${{ github.repository_owner }}/stable-journey-bot'
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
