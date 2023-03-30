@@ -142,6 +142,12 @@ deno task start
 
 で実行します。`Ctrl + C` で停止です。
 
+## 実行 (docker compose)
+
+```bash
+docker compose up
+```
+
 # コマンド一覧
 
 ## `/switch`
