@@ -1,0 +1,9 @@
+.vscode
+test
+Dockerfile
+.dockerignore
+.env.example
+.gitignore
+README.md
+LICENSE
+config.example.yaml
