@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  app:
+    container_name: stable-journey-bot
+    build: .
+    network_mode: host
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
